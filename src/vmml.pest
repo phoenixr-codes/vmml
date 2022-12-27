@@ -1,0 +1,41 @@
+document = {
+    SOI
+    ~ (
+        text
+        | field
+    )*
+    ~ EOI
+}
+
+text = { (&no_target_mark ~ no_attr_mark)+ }
+
+field = {
+  target_open
+  ~ (text_target | field)*
+  ~ target_close
+  ~ attr_open
+  ~ text_attr?
+  ~ attr_close
+}
+
+target_open = _{ "[" }
+target_close = _{ "]" }
+
+attr_open = _{ "(" }
+attr_close = _{ ")" }
+
+// provide functionality for escaping these
+no_target_mark = _{ !(target_close | target_open) ~ (escape | ANY) }
+no_attr_mark = _{ !(attr_close | attr_open) ~ (escape | ANY) }
+
+text_target = @{ no_target_mark+ }
+text_attr = @{ no_attr_mark+ }
+
+escape = _{ "\\" ~ (
+    "\\"
+    | target_open
+    | target_close
+    | attr_open
+    | attr_close
+)}
+

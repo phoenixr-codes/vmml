@@ -1,0 +1,23 @@
+[package]
+name = "vmml"
+version = "0.1.0"
+authors = ["phoenixR"]
+edition = "2021"
+description = "Very Minimal Markup Language"
+license = "MIT"
+keywords = [
+    "language",
+    "lightweight",
+    "markup",
+    "parse",
+]
+categories = [
+    "development-tools",
+    "parsing",
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pest = "2.4"
+pest_derive = "2.4"
