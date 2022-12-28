@@ -1,41 +1,39 @@
 document = {
     SOI
-    ~ (
-        text
-        | field
-    )*
+    ~ (text | element)*
     ~ EOI
 }
 
-text = { (&no_target_mark ~ no_attr_mark)+ }
-
-field = {
-  target_open
-  ~ (text_target | field)*
-  ~ target_close
-  ~ attr_open
-  ~ text_attr?
-  ~ attr_close
+text = {
+  (
+    (escape ~ escapable)
+    | ( !escapable ~ ANY )
+  )+
 }
 
-target_open = _{ "[" }
-target_close = _{ "]" }
+text_elem = { text }
+text_attr = { text }
 
-attr_open = _{ "(" }
-attr_close = _{ ")" }
+element = {
+  opening_bracket
+  ~ (text_elem | element)*
+  ~ closing_bracket
+  ~ opening_paren
+  ~ text_attr?
+  ~ closing_paren
+}
 
-// provide functionality for escaping these
-no_target_mark = _{ !(target_close | target_open) ~ (escape | ANY) }
-no_attr_mark = _{ !(attr_close | attr_open) ~ (escape | ANY) }
+opening_bracket = _{ "[" }
+closing_bracket = _{ "]" }
+opening_paren = _{ "(" }
+closing_paren = _{ ")" }
 
-text_target = @{ no_target_mark+ }
-text_attr = @{ no_attr_mark+ }
-
-escape = _{ "\\" ~ (
+escape = _{ "\\" }
+escapable = _{
     "\\"
-    | target_open
-    | target_close
-    | attr_open
-    | attr_close
-)}
+    | opening_bracket
+    | closing_bracket
+    | opening_paren
+    | closing_paren
+}
 

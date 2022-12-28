@@ -1,35 +1,21 @@
-//! Very Minimal Markup Language (VMML) is a lightweight markup language that supports
-//! nested `fields` (also known as "elements" in other markup languages such as XML)
-//! that contain an attribute.
-//!
-//! The purpose of VMML is giving the developer the ability to define how the attribute
-//! syntax is. Other things like escaping and capturing fields is done by the parser for
-//! the developer.
-//!
-//! An example of a VMML document looks as follows
-//!
-//! ```text
-//! The [quick](bold) brown [fox](orange) jumps [over the [lazy](bold) dog](italic).
-//! ```
-//!
-
 #[macro_use]
 extern crate pest_derive;
 
 use pest::iterators::Pairs;
 use pest::Parser;
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[grammar = "vmml.pest"]
 struct VMMLParser;
 
 /// A node may be text or a `field`.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Node<'a> {
     /// Text of node.
     Text(&'a str),
     /// Field of node.
-    Field {
+    Element {
         /// The content of the `field`.
         inner: Vec<Box<Node<'a>>>,
         /// Attribute of the `field`.
@@ -39,7 +25,7 @@ pub enum Node<'a> {
 
 type Nodes<'a> = Vec<Box<Node<'a>>>;
 
-fn parse_field<'a>(content: &mut Nodes<'a>, pairs: Pairs<'a, Rule>) -> Option<&'a str> {
+fn parse_element<'a>(content: &mut Nodes<'a>, pairs: Pairs<'a, Rule>) -> Option<&'a str> {
     let mut result: Option<&'a str> = None;
     for pair in pairs {
         match pair.as_rule() {
@@ -47,16 +33,16 @@ fn parse_field<'a>(content: &mut Nodes<'a>, pairs: Pairs<'a, Rule>) -> Option<&'
                 result = Some(pair.as_str());
             }
 
-            Rule::field => {
-                let mut field_content: Nodes<'a> = Vec::new();
-                let field_attr = parse_field(&mut field_content, pair.into_inner());
-                content.push(Box::new(Node::Field {
-                    inner: field_content,
-                    attr: field_attr.unwrap(),
+            Rule::element => {
+                let mut elem_content: Nodes<'a> = Vec::new();
+                let elem_attr = parse_element(&mut elem_content, pair.into_inner());
+                content.push(Box::new(Node::Element {
+                    inner: elem_content,
+                    attr: elem_attr.unwrap(),
                 }));
             }
 
-            Rule::text | Rule::text_target => {
+            Rule::text | Rule::text_elem => {
                 content.push(Box::new(Node::Text(pair.as_str())));
             }
 
@@ -84,7 +70,7 @@ pub fn parse<'a>(document: &'a str) -> Nodes {
     match parse {
         Ok(mut pairs) => {
             let doc = pairs.next().unwrap();
-            parse_field(&mut result, doc.into_inner());
+            parse_element(&mut result, doc.into_inner());
         }
         Err(e) => panic!("{e}"),
     }

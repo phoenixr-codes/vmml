@@ -9,12 +9,12 @@ fn parse_normal_text() {
 }
 
 #[test]
-fn parse_one_field() {
+fn parse_one_element() {
     assert_eq!(
         vmml::parse(r#"Hello, [beautiful](bold) World"#),
         vec![
             Box::new(Node::Text(r#"Hello, "#)),
-            Box::new(Node::Field {
+            Box::new(Node::Element {
                 inner: vec![Box::new(Node::Text(r#"beautiful"#))],
                 attr: r#"bold"#,
             }),
@@ -29,9 +29,9 @@ fn parse_nested() {
         vmml::parse(r#"Hello, [[beauti](italic)ful](bold) World"#),
         vec![
             Box::new(Node::Text(r#"Hello, "#)),
-            Box::new(Node::Field {
+            Box::new(Node::Element {
                 inner: vec![
-                    Box::new(Node::Field {
+                    Box::new(Node::Element {
                         inner: vec![Box::new(Node::Text(r#"beauti"#))],
                         attr: r#"italic"#,
                     }),
@@ -50,13 +50,13 @@ fn parse_multi_nested() {
         vmml::parse(r#"a[b[c[d](z)](y)](x)"#),
         vec![
             Box::new(Node::Text(r#"a"#)),
-            Box::new(Node::Field {
+            Box::new(Node::Element {
                 inner: vec![
                     Box::new(Node::Text(r#"b"#)),
-                    Box::new(Node::Field {
+                    Box::new(Node::Element {
                         inner: vec![
                             Box::new(Node::Text(r#"c"#)),
-                            Box::new(Node::Field {
+                            Box::new(Node::Element {
                                 inner: vec![Box::new(Node::Text(r#"d"#)),],
                                 attr: r#"z"#,
                             }),
@@ -75,12 +75,12 @@ fn parse_multiple() {
     assert_eq!(
         vmml::parse(r#"[Hello](bold), beautiful [World](italic)"#),
         vec![
-            Box::new(Node::Field {
+            Box::new(Node::Element {
                 inner: vec![Box::new(Node::Text(r#"Hello"#)),],
                 attr: r#"bold"#,
             }),
             Box::new(Node::Text(r#", beautiful "#)),
-            Box::new(Node::Field {
+            Box::new(Node::Element {
                 inner: vec![Box::new(Node::Text(r#"World"#)),],
                 attr: r#"italic"#,
             }),
@@ -95,7 +95,7 @@ fn parse_empty() {
 
 #[test]
 #[should_panic]
-fn attr_contains_field() {
+fn attr_contains_element() {
     vmml::parse(r#"Hello, [beautiful](a[b](c)) World"#);
 }
 

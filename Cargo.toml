@@ -1,10 +1,11 @@
 [package]
 name = "vmml"
-version = "0.1.0"
+version = "1.0.0"
 authors = ["phoenixR"]
 edition = "2021"
 description = "Very Minimal Markup Language"
 license = "MIT"
+readme = "README.md"
 keywords = [
     "language",
     "lightweight",
@@ -15,9 +16,10 @@ categories = [
     "development-tools",
     "parsing",
 ]
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+homepage = "https://docs.rs/vmml/latest/vmml/"
+repository = "https://github.com/phoenixr-codes/vmml"
 
 [dependencies]
 pest = "2.4"
 pest_derive = "2.4"
+serde = { version = "1.0.145", features = ["derive"]}
